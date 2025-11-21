@@ -31,4 +31,5 @@ private:
     boost::asio::io_context ioc_;
     boost::asio::ssl::context ssl_ctx_;
     boost::beast::websocket::stream<boost::beast::ssl_stream<boost::asio::ip::tcp::socket>> ws_;
+    beast::flat_buffer buffer_;
 };
