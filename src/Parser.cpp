@@ -11,8 +11,9 @@ void parseData()
     {
         stringJSON = rawData.pop();
         json = nlohmann::json::parse(stringJSON);
+        const auto& k = json["k"]; // all data important data is in "k" object
 
-        std::cout << json["s"];
+        CandleData closedCandle(k["s"], k["o"], k["c"], k["h"], k["l"], k["x"], k["q"]);
+        candleData.push(closedCandle);
     }
-
 }
