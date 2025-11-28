@@ -4,16 +4,26 @@
 void parseData()
 {
     std::cout << "Begin parsing" << std::endl;
-    std::string stringJSON;
+    std::string rawJSON;
     nlohmann::json json;
+    using namespace std;
 
     while(true)
     {
-        stringJSON = rawData.pop();
-        json = nlohmann::json::parse(stringJSON);
+        rawJSON = rawData.pop();
+        json = nlohmann::json::parse(rawJSON);
         const auto& k = json["k"]; // all data important data is in "k" object
 
-        CandleData closedCandle(k["s"], k["o"], k["c"], k["h"], k["l"], k["x"], k["q"]);
-        candleData.push(closedCandle);
+        string ticker = k["s"];
+        string open = k["o"];
+        string close = k["c"];
+        string high = k["h"];
+        string low = k["l"];
+        string volume = k["q"];
+        string closed = k["x"];
+        string interval = k["i"];
+
+        CandleData candle(ticker, stod(open), stod(close), stod(high), stod(low), stod(volume), closed, interval);
+        candleData.push(candle);
     }
 }
