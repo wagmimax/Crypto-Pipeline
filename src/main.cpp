@@ -3,19 +3,23 @@
 #include<ConcurrentQueue.h>
 #include<thread>
 #include<Database.h>
+#include<Aggregator.h>
 
 int main() {
-    WebSocketClient binanceStream("stream.binance.us", "9443", "/ws"
-        "/btcusdt@kline_1m/btcusdt@kline_5m/btcusdt@kline_15m"
-        "/solusdt@kline_1m/solusdt@kline_5m/solusdt@kline_15m"
-        "/ethusdt@kline_1m/ethusdt@kline_5m/ethusdt@kline_15m");
+    WebSocketClient coinbaseStream(
+    "advanced-trade-ws.coinbase.com",
+    "443",
+    "/ws/v1");
 
-    std::vector<std::string> pairs = {"BTCUSDT", "SOLUSDT", "ETHUSDT"};
+    std::vector<std::string> pairs = {"BTCUSD", "SOLUSD", "ETHUSD"};
     initTables(pairs);
 
-    std::thread socketWorker(&WebSocketClient::run, &binanceStream);
+    std::thread socketWorker(&WebSocketClient::run, &coinbaseStream);
     std::thread parseWorker(parseData);
+    //std::thread aggregateWorker(Aggregate);
 
+    
     socketWorker.join();
     parseWorker.join();
+    //aggregateWorker.join();
 }

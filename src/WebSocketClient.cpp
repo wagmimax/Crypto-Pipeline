@@ -28,7 +28,7 @@ void WebSocketClient::connect()
 
     ws_.next_layer().handshake(boost::asio::ssl::stream_base::client);
 
-    // binance sends a ping every 20 seconds
+    // send pong to keep connection
     ws_.control_callback(
         [&](boost::beast::websocket::frame_type frame_type,
             boost::beast::string_view payload)
@@ -39,6 +39,16 @@ void WebSocketClient::connect()
     );
 
     ws_.handshake(host_, path_);
+
+    std::string sub = R"({
+    "type": "subscribe",
+    "channels": [{
+            "name": "candles",
+            "product_ids": ["BTC-USD", "ETH-USD", "SOL-USD"]
+        }]
+    })";
+
+    ws_.write(boost::asio::buffer(sub));
 }
 
 
@@ -56,6 +66,6 @@ void WebSocketClient::run()
         std::string stringJSON = boost::beast::buffers_to_string(buffer_.data());
 
         rawData.push(stringJSON);
-        std::cout << "data pushed" << std::endl;
+        std::cout << "raw data pushed" << std::endl;
     }
 }

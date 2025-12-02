@@ -12,18 +12,22 @@ void parseData()
     {
         rawJSON = rawData.popCandle();
         json = nlohmann::json::parse(rawJSON);
-        const auto& k = json["k"]; // all data important data is in "k" object
+        std::cout << json;
+        
 
-        string ticker = k["s"];
-        string open = k["o"];
-        string close = k["c"];
-        string high = k["h"];
-        string low = k["l"];
-        string volume = k["q"];
-        bool closed = k["x"];
-        string interval = k["i"];
+        //const auto& candles = json["candles"][0]; //ohlc data is inside "candles"
+        //std::cout << candles << std::endl;
+        // string ticker = candles["product_id"];
+        // string open = candles["open"];
+        // string close = candles["close"];
+        // string high = candles["high"];
+        // string low = candles["low"];
+        // string volume = candles["volume"];
+        // string startTime = candles["start"];
 
-        CandleData candle(ticker, stod(open), stod(close), stod(high), stod(low), stod(volume), closed, interval);
-        candleData.push(candle);
+        // std::cout << ticker << "\n"; 
+
+        // CandleData candle(ticker, stod(open), stod(close), stod(high), stod(low), stod(volume), startTime);
+        // candleData.push(candle);
     }
 }

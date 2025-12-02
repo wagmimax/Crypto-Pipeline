@@ -12,12 +12,11 @@ struct CandleData
     double high;
     double low;
     double volume;
-    bool closed;
-    std::string interval;
+    std::string startTime;
 
     CandleData(const std::string& ticker, double open, double close,
-        double high, double low, double volume, bool closed, const std::string& interval):
-        ticker(ticker), open(open), close(close), high(high), low(low), volume(volume), closed(closed), interval(interval) {}
+        double high, double low, double volume, const std::string& startTime):
+        ticker(ticker), open(open), close(close), high(high), low(low), volume(volume), startTime(startTime) {}
 };
 
 void parseData();
