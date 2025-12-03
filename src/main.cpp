@@ -16,10 +16,10 @@ int main() {
 
     std::thread socketWorker(&WebSocketClient::run, &coinbaseStream);
     std::thread parseWorker(parseData);
-    //std::thread aggregateWorker(Aggregate);
+    std::thread aggregateWorker(Aggregate);
 
     
     socketWorker.join();
     parseWorker.join();
-    //aggregateWorker.join();
+    aggregateWorker.join();
 }

@@ -19,4 +19,16 @@ struct CandleData
         ticker(ticker), open(open), close(close), high(high), low(low), volume(volume), startTime(startTime) {}
 };
 
+struct TradeData
+{
+    std::string ticker;
+    std::string time;
+    double price;
+    double volume;
+    
+
+    TradeData(const std::string& ticker, const std::string& time, double price, double volume):
+        ticker(ticker), time(time), price(price), volume(volume) {}
+};
+
 void parseData();

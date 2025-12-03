@@ -42,10 +42,8 @@ void WebSocketClient::connect()
 
     std::string sub = R"({
     "type": "subscribe",
-    "channels": [{
-            "name": "candles",
-            "product_ids": ["BTC-USD", "ETH-USD", "SOL-USD"]
-        }]
+    "product_ids": ["BTC-USD", "ETH-USD", "SOL-USD"],
+    "channel": "market_trades"
     })";
 
     ws_.write(boost::asio::buffer(sub));
@@ -66,6 +64,6 @@ void WebSocketClient::run()
         std::string stringJSON = boost::beast::buffers_to_string(buffer_.data());
 
         rawData.push(stringJSON);
-        std::cout << "raw data pushed" << std::endl;
+        //std::cout << "raw data pushed" << std::endl;
     }
 }

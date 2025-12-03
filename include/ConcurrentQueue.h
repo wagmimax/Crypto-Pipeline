@@ -18,7 +18,7 @@ public:
         cv_.notify_one();
     };
 
-    T popCandle()
+    T pop()
     {
         std::unique_lock<std::mutex> lock(m_);
         cv_.wait(lock, [this]{ return !q_.empty(); });
@@ -35,4 +35,4 @@ private:
 };
 
 extern ConcurrentQueue<std::string> rawData;
-extern ConcurrentQueue<CandleData> candleData;
+extern ConcurrentQueue<TradeData> tradeData;

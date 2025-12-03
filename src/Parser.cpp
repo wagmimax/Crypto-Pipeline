@@ -10,24 +10,35 @@ void parseData()
 
     while(true)
     {
-        rawJSON = rawData.popCandle();
-        json = nlohmann::json::parse(rawJSON);
-        std::cout << json;
+        rawJSON = rawData.pop();
         
+        try
+        {
+            json = nlohmann::json::parse(rawJSON);
+            if(!json.contains("events") || json["events"].empty())
+                continue;
 
-        //const auto& candles = json["candles"][0]; //ohlc data is inside "candles"
-        //std::cout << candles << std::endl;
-        // string ticker = candles["product_id"];
-        // string open = candles["open"];
-        // string close = candles["close"];
-        // string high = candles["high"];
-        // string low = candles["low"];
-        // string volume = candles["volume"];
-        // string startTime = candles["start"];
+            const auto& events = json["events"][0];
+            
+            if(!events.contains("trades") || events["trades"].empty())
+                continue;
 
-        // std::cout << ticker << "\n"; 
+            const auto& trades = events["trades"];
 
-        // CandleData candle(ticker, stod(open), stod(close), stod(high), stod(low), stod(volume), startTime);
-        // candleData.push(candle);
+            //coinbase sends batch trades in an array when they happen in the same microsecond
+            for(const auto& trade : trades)
+            {
+                tradeData.push(TradeData{
+                    trade["product_id"].get<std::string>(), 
+                    trade["time"].get<std::string>(), 
+                    std::stod(trade["price"].get<std::string>()), 
+                    std::stod(trade["size"].get<std::string>())
+                });
+            }
+        }
+        catch(const std::exception& e)
+        {
+            std::cerr << "Error processing trade: " << e.what() << std::endl;
+        }
     }
 }

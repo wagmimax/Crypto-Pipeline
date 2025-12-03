@@ -1,13 +1,13 @@
 #include<Aggregator.h>
 
-// void Aggregate()
-// {
-//     while(true)
-//     {
-//         CandleData currentCandle = candleData.popCandle();
+void Aggregate()
+{
+    while(true)
+    {
+        TradeData currentTrade = tradeData.pop();
 
-//         if(currentCandle.closed)
-//             writeData(currentCandle); 
-//     }
+        std::cout << "Ticker: " << currentTrade.ticker << " Time: " << currentTrade.time 
+        << " Price: " << currentTrade.price << " Volume: " << currentTrade.volume << std::endl;
+    }
     
-// }
+}
