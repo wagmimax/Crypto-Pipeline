@@ -16,7 +16,7 @@ void initTables(std::vector<std::string>& pairs)
     {
         currentPair = pairs[i];
         std::string sql = "CREATE TABLE IF NOT EXISTS " + currentPair + " ("
-        "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+        "timestamp TEXT PRIMARY KEY,"
         "open REAL, "
         "high REAL, "
         "low REAL, "
@@ -44,8 +44,9 @@ void writeData(CandleData candle)
     sqlite3* db;
     sqlite3_open("../../../data/Database.db", &db);
 
-    std::string sql = "INSERT INTO " + candle.ticker + " (open, high, low, close, volume) "
-        "VALUES (" 
+    std::string sql = "INSERT INTO " + candle.ticker + " (timestamp, open, high, low, close, volume) "
+        "VALUES ('"
+        + candle.timestamp + "', "
         + std::to_string(candle.open) + ", " 
         + std::to_string(candle.high) + ", " 
         + std::to_string(candle.low) + ", " 

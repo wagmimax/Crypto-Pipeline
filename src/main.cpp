@@ -7,7 +7,6 @@
 
 int main() {
     
-    
     WebSocketClient coinbaseStream(
     "advanced-trade-ws.coinbase.com",
     "443",
@@ -26,7 +25,6 @@ int main() {
     std::thread parseWorker(parseData);
     std::thread aggregateWorker(Aggregate);
 
-    
     socketWorker.join();
     parseWorker.join();
     aggregateWorker.join();

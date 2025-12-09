@@ -21,6 +21,12 @@ find_package(unofficial-sqlite3 CONFIG REQUIRED)
 # --- OpenSSL ---
 find_package(OpenSSL REQUIRED)
 
+# --- implot ---
+find_package(implot CONFIG REQUIRED)
+
+# --- imgui ---
+find_package(imgui CONFIG REQUIRED)
+
 # --- Source files ---
 file(GLOB SOURCES ${PROJECT_SOURCE_DIR}/src/*.cpp)
 
@@ -34,6 +40,9 @@ target_link_libraries(${PROJECT_NAME}
     unofficial::sqlite3::sqlite3
     OpenSSL::SSL
     OpenSSL::Crypto
+    imgui::imgui
+    implot::implot
+    ws2_32
 )
 
 #cmake .. -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -G "Visual Studio 17 2022" -A x64 (to init)
