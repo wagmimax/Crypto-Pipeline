@@ -14,7 +14,7 @@ int NamedPipe::createConnection()
     }
 
     //start up other process, which will be client
-    std::system("start python ../../../src/IPC.py");
+    std::system("start python ../../../src/ControlPanel.py");
     Connected = ConnectNamedPipe(hPipe, NULL);
     
 

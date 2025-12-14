@@ -11,7 +11,8 @@ import threading
 from datetime import datetime, timedelta
 import random
 
-candlesBTC = []
+#candles is a dict, where the values are lists of dicts
+candles = {}
 candles_lock = threading.Lock()
 
 def read_pipe():
@@ -43,36 +44,34 @@ def read_pipe():
                         try:
                             dt = datetime.fromisoformat(ts[0:19])
                             timestamp = dt.timestamp()
-                            #print(ts)
+                            #print(ts) 2025-12-13T02:58:53.152515Z
                         except ValueError as e:
                             print(f"Timestamp parse error: {e}, skipping")
                             continue
-                        #2025-12-13T02:58:53.152515Z
-                        if ticker != 'BTC':
-                            continue
+                        
                         with candles_lock:
                             #if candles is empty, append the current candle
-                            if len(candlesBTC) == 0 and ticker == 'BTC':
-                                candlesBTC.append({'Open':o,
+                            if ticker not in candles:
+                                candles[ticker] = ([{'Open':o,
                                             'High':h,
                                             'Low':l,
                                             'Close':c,
                                             'Time':timestamp,
-                                            'Min':min})
+                                            'Min':min}])
                             #if the minute is different, append the new candle
-                            elif not (candlesBTC[-1]['Min'] == min) and ticker == 'BTC':
-                                candlesBTC.append({'Open':o,
+                            elif not (candles[ticker][-1]['Min'] == min):
+                                candles[ticker].append({'Open':o,
                                             'High':h,
                                             'Low':l,
                                             'Close':c,
                                             'Time':timestamp,
                                             'Min':min})
-                            elif ticker == 'BTC':
+                            else:
                                 #update current candle 
-                                candlesBTC[-1]['Open'] = o
-                                candlesBTC[-1]['High'] = h
-                                candlesBTC[-1]['Low'] = l
-                                candlesBTC[-1]['Close'] = c
+                                candles[ticker][-1]['Open'] = o
+                                candles[ticker][-1]['High'] = h
+                                candles[ticker][-1]['Low'] = l
+                                candles[ticker][-1]['Close'] = c
                             
                         #print(f"Candle: {ticker} O:{o} H:{h} L:{l} C:{c} V:{vol} T:{ts} M:{min}")         
             else:
@@ -80,23 +79,26 @@ def read_pipe():
     except Exception as e:
         print(f"Error: {e}")
 
-pipe_thread = threading.Thread(target=read_pipe, daemon=True)
-pipe_thread.start()
+def initThreads():
+    pipe_thread = threading.Thread(target=read_pipe, daemon=True)
+    pipe_thread.start()
 
-def update_chart():
+def update_chart(ticker, ax):
         with candles_lock:
-            if len(candlesBTC) == 0:
+            if ticker not in candles:
                 return
-            df = pd.DataFrame(candlesBTC)
+            df = pd.DataFrame(candles[ticker])
 
         ax.clear()
         fplt.candlestick_ochl(df[['Time', 'Open', 'Close', 'High', 'Low']], ax=ax)
         fplt.refresh()
 
-ax = fplt.create_plot('BTC Chart', init_zoom_periods=30)
+def changeChart(ticker):
+ 
+    ax = fplt.create_plot(f'{ticker} Chart', init_zoom_periods=30)
 
-# Set up timer to update chart periodically
-fplt.timer_callback(update_chart, 0.1)  # Update every 1 second
 
-# Show plot (blocking - keeps main thread alive)
-fplt.show()
+    # Set up timer to update chart periodically
+    fplt.timer_callback(lambda: update_chart(ticker, ax), 0.1)  # Update every 1 second
+    # Show plot
+    fplt.show()
