@@ -14,7 +14,7 @@ Makefile
 Thumbs.db
 
 # SQLite database
-/data/*.db
+data/*
 
 #local build script
 build.cmd

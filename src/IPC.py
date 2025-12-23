@@ -19,8 +19,6 @@ def read_pipe():
     pipe_name = r'\\.\pipe\dataPipe'
     buffer = ""
     
-
-    #read live data
     try:
         pipe_handle = win32file.CreateFile(
             pipe_name, win32file.GENERIC_READ, 0, None,
@@ -34,7 +32,6 @@ def read_pipe():
             if result == 0:
                 buffer += data.decode('utf-8')
                 
-                # Process complete lines
                 while '\n' in buffer:
                     line, buffer = buffer.split('\n', 1)
                     parts = line.strip().split()
@@ -97,8 +94,7 @@ def changeChart(ticker):
  
     ax = fplt.create_plot(f'{ticker} Chart', init_zoom_periods=30)
 
-
     # Set up timer to update chart periodically
     fplt.timer_callback(lambda: update_chart(ticker, ax), 0.1)  # Update every 1 second
-    # Show plot
+
     fplt.show()

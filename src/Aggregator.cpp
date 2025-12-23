@@ -2,11 +2,11 @@
 
 void Aggregate(Database& sqliteDB)
 {
-    std::unordered_map<std::string, CandleData> candles;
+    std::unordered_map<std::string, CandleData> currentCandles;
 
-    candles.emplace("BTC", CandleData("BTC", -1, -1, -1, -1, -1, "temp", "temp", std::chrono::high_resolution_clock::now()));
-    candles.emplace("ETH", CandleData("ETH", -1, -1, -1, -1, -1, "temp", "temp", std::chrono::high_resolution_clock::now()));
-    candles.emplace("SOL", CandleData("SOL", -1, -1, -1, -1, -1, "temp", "temp", std::chrono::high_resolution_clock::now()));
+    currentCandles.emplace("BTC", CandleData("BTC", -1, -1, -1, -1, -1, "temp", "temp", std::chrono::high_resolution_clock::now()));
+    currentCandles.emplace("ETH", CandleData("ETH", -1, -1, -1, -1, -1, "temp", "temp", std::chrono::high_resolution_clock::now()));
+    currentCandles.emplace("SOL", CandleData("SOL", -1, -1, -1, -1, -1, "temp", "temp", std::chrono::high_resolution_clock::now()));
 
     std::unordered_map<std::string, std::string> lastTimestamp;
     lastTimestamp["BTC"] = "";
@@ -30,35 +30,35 @@ void Aggregate(Database& sqliteDB)
 
 
         //initialize new candle when minute changes
-        if(candles.at(ticker).minute != currentMinute)
+        if(currentCandles.at(ticker).minute != currentMinute)
         {
-            if(candles.at(ticker).minute != "temp")
+            if(currentCandles.at(ticker).minute != "temp")
             {
-                candles[ticker].latencyTimestamp = currentTrade.latencyTimestamp;
-                sqliteDB.writeData(candles.at(ticker));
-                std::cout << candles.at(ticker).minute << " Candle Closed. OHLC: " << candles.at(ticker).open 
-                    << " High: " << candles.at(ticker).high << " Low: " << candles.at(ticker).low 
-                    << " Close: " << candles.at(ticker).close << " Timestamp: " << candles.at(ticker).timestamp << std::endl;
+                currentCandles[ticker].latencyTimestamp = currentTrade.latencyTimestamp;
+                sqliteDB.writeData(currentCandles.at(ticker));
+                std::cout << currentCandles.at(ticker).minute << " Candle Closed. OHLC: " << currentCandles.at(ticker).open 
+                    << " High: " << currentCandles.at(ticker).high << " Low: " << currentCandles.at(ticker).low 
+                    << " Close: " << currentCandles.at(ticker).close << " Timestamp: " << currentCandles.at(ticker).timestamp << std::endl;
             }
             
-            candles[ticker].open = currentTrade.price;
-            candles[ticker].high = currentTrade.price;
-            candles[ticker].low = currentTrade.price;
-            candles[ticker].close = currentTrade.price;
-            candles[ticker].volume = 0;
-            candles[ticker].minute = currentMinute;
-            candles[ticker].timestamp = currentTrade.time;
+            currentCandles[ticker].open = currentTrade.price;
+            currentCandles[ticker].high = currentTrade.price;
+            currentCandles[ticker].low = currentTrade.price;
+            currentCandles[ticker].close = currentTrade.price;
+            currentCandles[ticker].volume = 0;
+            currentCandles[ticker].minute = currentMinute;
+            currentCandles[ticker].timestamp = currentTrade.time;
         }
 
         //update current candle
-        candles[ticker].close = currentTrade.price;
-        candles[ticker].volume += currentTrade.volume;
+        currentCandles[ticker].close = currentTrade.price;
+        currentCandles[ticker].volume += currentTrade.volume;
 
-        if(candles.at(ticker).high < currentTrade.price)
-            candles[ticker].high = currentTrade.price;
-        else if(candles.at(ticker).low > currentTrade.price)
-            candles[ticker].low = currentTrade.price; 
+        if(currentCandles.at(ticker).high < currentTrade.price)
+            currentCandles[ticker].high = currentTrade.price;
+        else if(currentCandles.at(ticker).low > currentTrade.price)
+            currentCandles[ticker].low = currentTrade.price; 
 
-        candleData.push(candles.at(ticker));
+        candleData.push(currentCandles.at(ticker));
     }
 }
