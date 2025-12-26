@@ -41,18 +41,19 @@ void Backtester::run(Strategy& strategy)
         candle.volume = std::stod(field);
         // -----------------------------------------------------------
 
-        //std::cout << std::fixed << std::setprecision(2) 
-        //<< "Candle OHLCV: " << candle.open << " " << candle.high << " " << candle.low << " " << candle.close << " " << candle.volume << "\n"; 
+        std::cout << std::fixed << std::setprecision(2) 
+        << "Candle OHLCV: " << candle.open << " " << candle.high << " " << candle.low << " " << candle.close << " " << candle.volume << "\n"; 
 
         //run candle through strategy and receive signal
         Trade trade = strategy.next(candle);
 
         //operate based off signal
-        trade.tradeIntent = TradeIntent::LONG;
-        std::cin >> trade.entryLevel;
-        std::cin >> trade.stopLossPercent;
-        paperAccount.enterPosition(trade);
+        if(trade.tradeIntent != TradeIntent::NONE)
+            paperAccount.enterPosition(trade);
 
         //check if candle triggers position closes
+        paperAccount.checkOpenPositions(candle);
     }
+
+    std::cout << "Final account balance: " << paperAccount.getBalance() << std::endl;
 }

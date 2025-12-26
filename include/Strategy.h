@@ -1,5 +1,6 @@
 #pragma once
 #include "Parser.h"
+#include<deque>
 
 enum struct TradeIntent
 {
@@ -41,5 +42,5 @@ private:
 
     Level resistance;
     Level support;
-    std::vector<CandleData> rollingWindow;
+    std::deque<CandleData> rollingWindow;
 };

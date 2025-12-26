@@ -9,7 +9,7 @@ void PaperAccount::enterPosition(Trade tradeSignal)
 
         //these will help with calculating PNL later 
         position.stopLossPercent = tradeSignal.stopLossPercent;
-        position.targetProfitPercent = (tradeSignal.stopLossPercent + totalFees)* 3;
+        position.targetProfitPercent = (tradeSignal.stopLossPercent + totalFees) * 3 + totalFees;
 
         //this ensures our position size, with fees accounted for, will always lose us our currentRisk_% of our account upon stop loss hitting
         position.positionSize = (balance_ * (currentRisk_/100)) / ((tradeSignal.stopLossPercent + makerFees_ + takerFees_)/100);
@@ -30,6 +30,7 @@ void PaperAccount::enterPosition(Trade tradeSignal)
         position.tradeType = tradeSignal.tradeIntent;
         position.active = true;
 
+        std::cout << "POSITION SIZE: " << position.positionSize << "\n";
         std::cout << "IN TRADE, TP ENTRY SL: " << position.targetProfitPrice << " " << position.entryPrice << " " << position.stopLossPrice << std::endl;
         std::cout << "STOPLOSS%: " << position.stopLossPercent << " TARGETPROFIT%: " << position.targetProfitPercent << std::endl;
 
@@ -89,6 +90,48 @@ void PaperAccount::checkOpenPositions(CandleData candle)
                 balance_ -= loss;
                 position.active = false;
             }
+        }
+
+        adjustRisk();
+    }
+}
+
+void PaperAccount::adjustRisk()
+{
+    if(currentRisk_ == 2.0)
+    {
+        if(balance_ > riskLevels[2.0])
+            riskLevels[2.0] = balance_;
+        else if(balance_ < riskLevels[2.0])
+        {
+            currentRisk_ = 1.0;
+            riskLevels[1.0] = balance_;
+        }
+    }
+    else if(currentRisk_ == 1.0)
+    {
+        if(balance_ >= riskLevels[2.0])
+        {   
+            currentRisk_ = 2.0;
+            riskLevels[2.0] = balance_;
+        }
+        else if(balance_ < riskLevels[1.0])
+        {
+            currentRisk_ = 0.5;
+            riskLevels[0.5] = balance_;
+        }
+    }
+    else if(currentRisk_ == 0.5)
+    {
+        if(balance_ >= 2.0)
+        {
+            currentRisk_ = 2.0;
+            riskLevels[2.0] = balance_;
+        }
+        else if(balance_ >= 1.0)
+        {
+            currentRisk_ = 1.0;
+            riskLevels[1.0] = balance_;
         }
     }
 }
