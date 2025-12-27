@@ -6,11 +6,13 @@ Trade SupportResistance::next(CandleData candle)
 
     Trade trade{TradeIntent::NONE, -1, -1};    
 
-    if(resistance.touches > 2 && resistance.active && candle.close > resistance.price + resistance.price * tolerance) 
-    {trade.tradeIntent = TradeIntent::LONG, trade.entryLevel = candle.close, trade.stopLossPercent = 0.3;}
+    //check if breakouts are happening
+    if(resistance.touches > touchThreshold && resistance.active && candle.close > resistance.price + resistance.price * tolerance) 
+    {trade.tradeIntent = TradeIntent::LONG, trade.entryLevel = candle.close, trade.stopLossPercent = 0.65;}
 
-    if(support.touches > 2 && support.active && candle.close < support.price - support.price * tolerance) 
-    {trade.tradeIntent = TradeIntent::SHORT, trade.entryLevel = candle.close, trade.stopLossPercent = 0.3;}
+    if(support.touches > touchThreshold && support.active && candle.close < support.price - support.price * tolerance) 
+    {trade.tradeIntent = TradeIntent::SHORT, trade.entryLevel = candle.close, trade.stopLossPercent = 0.65;}
+    //--------------------------------
 
     if(rollingWindow.size() >= 6)
     {   
@@ -37,7 +39,7 @@ Trade SupportResistance::next(CandleData candle)
             //new resistance being made
             else if(rollingWindow[2].high > resistance.price + resistance.price * tolerance)
             {
-                resistance.price = candle.high;
+                resistance.price = rollingWindow[2].high;
                 resistance.age = 0;
                 resistance.touches = 0;
                 std::cout << "New resistance made at " << resistance.price << std::endl;
@@ -62,7 +64,7 @@ Trade SupportResistance::next(CandleData candle)
             //new support being made
             else if(rollingWindow[2].low < support.price - support.price * tolerance)
             {
-                support.price = candle.low;
+                support.price = rollingWindow[2].low;
                 support.age = 0;
                 support.touches = 0;
                 std::cout << "New support made at " << support.price << std::endl;

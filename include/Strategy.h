@@ -34,7 +34,8 @@ public:
     SupportResistance():
     resistance({0,0,0,false}), 
     support({std::numeric_limits<double>::max(),0,0,false}), 
-    tolerance(0.0005) 
+    tolerance(0.0005),
+    touchThreshold(5)
     {}
 
     Trade next(CandleData) override;
@@ -47,8 +48,9 @@ private:
         bool active;
     };
 
+    std::deque<CandleData> rollingWindow;
     Level resistance;
     Level support;
-    std::deque<CandleData> rollingWindow;
     double tolerance;
+    int touchThreshold;
 };

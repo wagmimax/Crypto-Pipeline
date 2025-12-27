@@ -9,12 +9,12 @@ void PaperAccount::enterPosition(Trade tradeSignal)
 
         //these will help with calculating PNL later 
         position.stopLossPercent = tradeSignal.stopLossPercent;
-        position.targetProfitPercent = (tradeSignal.stopLossPercent + totalFees) * 3 + totalFees;
+        position.targetProfitPercent = (tradeSignal.stopLossPercent + totalFees) * RR + totalFees;
 
         //this ensures our position size, with fees accounted for, will always lose us our currentRisk_% of our account upon stop loss hitting
         position.positionSize = (balance_ * (currentRisk_/100)) / ((tradeSignal.stopLossPercent + makerFees_ + takerFees_)/100);
 
-        //calculate stoploss and targetprofit price levels (1:3 Risk:Reward)
+        //calculate stoploss and targetprofit price levels (1:3 Risk:Reward by default)
         if(tradeSignal.tradeIntent == TradeIntent::LONG)
         {
             position.stopLossPrice = tradeSignal.entryLevel * (1 - (tradeSignal.stopLossPercent / 100));
@@ -57,6 +57,7 @@ void PaperAccount::checkOpenPositions(CandleData candle)
                 double profit = position.positionSize * position.targetProfitPercent/100;
                 balance_ += profit;
                 position.active = false;
+                wins++;
                 std::cout << "TAKEPROFIT HIT, BALANCE: " << balance_ << " PROFIT OF " << profit << std::endl;
             }
 
@@ -66,6 +67,7 @@ void PaperAccount::checkOpenPositions(CandleData candle)
                 double loss = position.positionSize * position.stopLossPercent/100;
                 balance_ -= loss;
                 position.active = false;
+                losses++;
                 std::cout << "STOPLOSS HIT, BALANCE: " << balance_ << " LOSS OF " <<  loss << std::endl;
             }
         }
@@ -85,6 +87,7 @@ void PaperAccount::checkOpenPositions(CandleData candle)
                 double profit = position.positionSize * position.targetProfitPercent/100;
                 balance_ += profit;
                 position.active = false;
+                wins++;
                 std::cout << "TAKEPROFIT HIT, BALANCE: " << balance_ << " PROFIT OF " << profit << std::endl;
             }
 
@@ -94,6 +97,7 @@ void PaperAccount::checkOpenPositions(CandleData candle)
                 double loss = position.positionSize * position.stopLossPercent/100;
                 balance_ -= loss;
                 position.active = false;
+                losses++;
                 std::cout << "STOPLOSS HIT, BALANCE: " << balance_ << " LOSS OF " <<  loss << std::endl;
             }
         }

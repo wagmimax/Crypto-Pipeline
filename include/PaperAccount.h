@@ -6,7 +6,7 @@
 class PaperAccount
 {
 public:
-    PaperAccount(): balance_(50000), leverage_(10), makerFees_(0.02), takerFees_(0.05), inLong_(false), inShort_(false), currentRisk_(2.0)
+    PaperAccount(): balance_(50000), makerFees_(0.02), takerFees_(0.05), currentRisk_(2.0), RR(3), wins(0), losses(0)
     {riskLevels[2.0] = balance_; 
      riskLevels[1.0] = balance_;
      riskLevels[0.5] = balance_;}
@@ -20,15 +20,15 @@ public:
      riskLevels[2.0] = balance; 
      riskLevels[1.0] = balance;
      riskLevels[0.5] = balance;}
-    void setLeverage(int leverage)      { leverage_ = leverage; }
     void setMakerFees(double makerFees) { makerFees_ = makerFees; }
     void setTakerFees(double takerFees) { takerFees_ = takerFees; }
 
     //getters
     double getBalance() const           { return balance_; }
-    int getLeverage() const             { return leverage_; }
     double getMakerFees() const         { return makerFees_; }
     double getTakerFees() const         { return takerFees_; }
+    int getWins() const                 { return wins; }
+    int getLosses() const               { return losses; }
 
     void enterPosition(Trade);
     void checkOpenPositions(CandleData);
@@ -53,8 +53,7 @@ private:
     double balance_;
     double makerFees_; 
     double takerFees_; 
-    int leverage_;
-    bool inLong_;
-    bool inShort_;
-    
+    int RR;
+    int wins;
+    int losses;
 };
