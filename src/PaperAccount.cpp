@@ -9,7 +9,7 @@ void PaperAccount::enterPosition(Trade tradeSignal)
 
         //these will help with calculating PNL later 
         position.stopLossPercent = tradeSignal.stopLossPercent;
-        position.targetProfitPercent = (tradeSignal.stopLossPercent + totalFees) * RR + totalFees;
+        position.targetProfitPercent = (tradeSignal.stopLossPercent + totalFees) * RR_ + totalFees;
 
         //this ensures our position size, with fees accounted for, will always lose us our currentRisk_% of our account upon stop loss hitting
         position.positionSize = (balance_ * (currentRisk_/100)) / ((tradeSignal.stopLossPercent + makerFees_ + takerFees_)/100);
@@ -133,12 +133,12 @@ void PaperAccount::adjustRisk()
     }
     else if(currentRisk_ == 0.5)
     {
-        if(balance_ >= 2.0)
+        if(balance_ >= riskLevels[2.0])
         {
             currentRisk_ = 2.0;
             riskLevels[2.0] = balance_;
         }
-        else if(balance_ >= 1.0)
+        else if(balance_ >= riskLevels[1.0])
         {
             currentRisk_ = 1.0;
             riskLevels[1.0] = balance_;

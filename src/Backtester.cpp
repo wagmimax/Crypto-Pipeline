@@ -5,9 +5,7 @@
 
 void Backtester::run(Strategy& strategy)
 {
-    using dirIterator = std::filesystem::recursive_directory_iterator;
-
-    for (const auto& dirEntry : dirIterator("../../../data"))
+    for (const auto& dirEntry : std::filesystem::recursive_directory_iterator("../../../data"))
     {
         if(dirEntry.path().string().substr(dirEntry.path().string().size() - 4) != ".csv")
             continue;
@@ -73,8 +71,11 @@ void Backtester::run(Strategy& strategy)
         int losses = paperAccount.getLosses();
         double winrate = static_cast<double>(wins) / (wins + losses) * 100;
 
+        if(auto* supportresistance = dynamic_cast<SupportResistance*>(&strategy))
+            supportresistance->clearWindow();
+
         std::cout << "Final account balance: " << paperAccount.getBalance() << std::endl;
         std::cout << "Wins: " << wins << " Losses: " << losses << std::endl;
-        std::cout << "Winrate%: " << winrate << std::endl;
+        std::cout << "Winrate: " << winrate << "%" << std::endl;
     }
 }

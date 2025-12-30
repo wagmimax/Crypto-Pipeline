@@ -1,6 +1,6 @@
 #include <Strategy.h>
 
-Trade SupportResistance::next(CandleData candle)
+Trade SupportResistance::next(const CandleData& candle)
 {
     rollingWindow.push_back(candle);
 
@@ -33,7 +33,7 @@ Trade SupportResistance::next(CandleData candle)
             {
                 resistance.touches++;
                 resistance.age = 0;
-                std::cout << "Resistance touched at " << rollingWindow[2].high << std::endl;
+                if(DEBUGGING_ON) std::cout << "Resistance touched at " << rollingWindow[2].high << std::endl;
             }
 
             //new resistance being made
@@ -42,7 +42,7 @@ Trade SupportResistance::next(CandleData candle)
                 resistance.price = rollingWindow[2].high;
                 resistance.age = 0;
                 resistance.touches = 0;
-                std::cout << "New resistance made at " << resistance.price << std::endl;
+                if(DEBUGGING_ON) std::cout << "New resistance made at " << resistance.price << std::endl;
                 resistance.active = true;
             }
         }
@@ -59,7 +59,7 @@ Trade SupportResistance::next(CandleData candle)
             {
                 support.touches++;
                 support.age = 0;
-                std::cout << "Support touched at " << rollingWindow[2].low << std::endl;;
+                if(DEBUGGING_ON) std::cout << "Support touched at " << rollingWindow[2].low << std::endl;;
             }
             //new support being made
             else if(rollingWindow[2].low < support.price - support.price * tolerance)
@@ -67,15 +67,22 @@ Trade SupportResistance::next(CandleData candle)
                 support.price = rollingWindow[2].low;
                 support.age = 0;
                 support.touches = 0;
-                std::cout << "New support made at " << support.price << std::endl;
+                if(DEBUGGING_ON) std::cout << "New support made at " << support.price << std::endl;
                 support.active = true;
             }
         }
         
         //if levels becomes old, replace them
-        if(resistance.age > 100) {resistance.price = 0; resistance.age = 0; resistance.touches = 0; std::cout << "Resistance expired\n"; resistance.active = false;}
-        if(support.age > 100) {support.price = std::numeric_limits<double>::max(); support.age = 0; support.touches = 0; std::cout << "Support expired\n"; support.active = false;}
+        if(resistance.age > 100) {resistance.price = 0; resistance.age = 0; resistance.touches = 0; if(DEBUGGING_ON) std::cout << "Resistance expired\n"; resistance.active = false;}
+        if(support.age > 100) {support.price = std::numeric_limits<double>::max(); support.age = 0; support.touches = 0; if(DEBUGGING_ON) std::cout << "Support expired\n"; support.active = false;}
     }      
 
     return trade;
+}
+
+void SupportResistance::clearWindow()
+{
+    rollingWindow.clear();
+    resistance.active = false;
+    support.active = false;
 }

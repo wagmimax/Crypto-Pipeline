@@ -22,10 +22,13 @@ struct Trade
 class Strategy
 {
 public:
-    virtual Trade next(CandleData) {std::cout << "Entity" << std::endl; return Trade{};};
+    Strategy(): DEBUGGING_ON(false){}
+    virtual ~Strategy() = default;
 
-private:
-    
+    virtual Trade next(const CandleData&) = 0;
+
+protected:
+    bool DEBUGGING_ON;
 };
 
 class SupportResistance : public Strategy
@@ -35,10 +38,12 @@ public:
     resistance({0,0,0,false}), 
     support({std::numeric_limits<double>::max(),0,0,false}), 
     tolerance(0.0005),
-    touchThreshold(5)
+    touchThreshold(3)
     {}
 
-    Trade next(CandleData) override;
+    Trade next(const CandleData&) override;
+    void clearWindow();
+
 private:
     struct Level
     {
