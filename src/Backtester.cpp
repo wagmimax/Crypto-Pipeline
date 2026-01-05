@@ -3,28 +3,35 @@
 #include<chrono>
 #include<filesystem>
 
+//finds your OS's temp files folder, and creates a directory there. 
+//automatically cleans up (deletes) the directory once lifetime expires.
 class TempPath
 {
 public:
-    TempPath()
+    TempPath(const std::string& tempName = "TEMPCPPAPPFILES")
     {
-        path_ = std::filesystem::temp_directory_path() / "TEMP!BINANCE!CANDLES!";  
+        path_ = std::filesystem::temp_directory_path() / tempName;  
+        std::filesystem::create_directories(path_);
     }
 
     ~TempPath()
     {
-        //std::filesystem::remove(path_);
+        std::filesystem::remove_all(path_);
     }
 
-    void printPath() { std::cout << path_ << std::endl; }
+    std::filesystem::path getPath() const { return path_; }
+
+    void printPath() const { std::cout << path_ << std::endl; }
 private:
     std::filesystem::path path_;
 };
 
 void Backtester::run(Strategy& strategy)
 {
-    loadHistoricalData(5, "BNBUSDT");
-    for (const auto& dirEntry : std::filesystem::recursive_directory_iterator("../../../data"))
+    TempPath tempPath("BINANCEHISTORICALCANDLES");
+    loadHistoricalData(tempPath.getPath(), 5, "BNBUSDT");
+
+    for (const auto& dirEntry : std::filesystem::recursive_directory_iterator(tempPath.getPath()))
     {
         if(dirEntry.path().string().substr(dirEntry.path().string().size() - 4) != ".csv")
             continue;
@@ -70,6 +77,7 @@ void Backtester::run(Strategy& strategy)
             candle.volume = std::stod(field);
             // -----------------------------------------------------------
 
+
             //run candle through strategy and receive signal
             Trade trade = strategy.next(candle);
 
@@ -85,6 +93,8 @@ void Backtester::run(Strategy& strategy)
             supportresistance->clearWindow();
     }
 
+
+    //--------------------- Final Metrics output ---------------------------
     double wins = paperAccount.getWins();
     double losses = paperAccount.getLosses();
     double winrate = wins / (wins + losses) * 100;
@@ -104,6 +114,8 @@ void Backtester::run(Strategy& strategy)
             : tabulate::Color::red);
 
     std::cout << metricsTable << std::endl;
+    //--------------------------------------------------------------------------
+
 }
 
 void Backtester::userControl()
@@ -112,25 +124,20 @@ void Backtester::userControl()
 }
 
 //calls binance API for historical candle data and unzips of the files
-void Backtester::loadHistoricalData(const int& granularity, const std::string_view& ticker)
+void Backtester::loadHistoricalData(const std::filesystem::path& path, const int& granularity, const std::string_view& ticker)
 {
     //mock command we are trying to replicate:
-    //curl -s "https://data.binance.us/public_data/spot/monthly/klines/BNBUSDT/12h/BNBUSDT-12h-2023-01.zip" -o BNBUS2DT-12h-2023-01-01.zip
-
-    std::string month;
-
-    TempPath path;
-    path.printPath();
+    //curl -s "https://data.binance.us/public_data/spot/monthly/klines/BNBUSDT/12h/BNBUSDT-12h-2023-01.zip" -o {tempdir}/BNBUS2DT-12h-2023-01-01.zip
 
     //downloads a full year worth of data
     for(int i{1}; i < 13; i++)
     {
-        month = (i < 10) 
+        std::string month = (i < 10) 
             ? "0" + std::to_string(i) 
             : std::to_string(i); 
 
         std::string curlCommand = std::format(
-            R"(curl -s  "https://data.binance.us/public_data/spot/monthly/klines/{}/{}m/{}-{}m-2023-{}.zip" -o )",
+            R"(curl -s  "https://data.binance.us/public_data/spot/monthly/klines/{}/{}m/{}-{}m-2025-{}.zip" -o )",
             ticker,
             granularity,
             ticker,
@@ -138,14 +145,21 @@ void Backtester::loadHistoricalData(const int& granularity, const std::string_vi
             month
         );
 
-        std::string outputName = std::format(
-            R"({}-{}m-2023-{}.zip)",
+        std::string outputFile = std::format(
+            R"({}/{}-{}m-2023-{}.zip)",
+            path.string(),
             ticker,
             granularity,
             month
         );
 
-        std::system((curlCommand + outputName).c_str());
-        std::system(("unzip " + outputName).c_str());
+        std::string unzipCommand = std::format(
+            R"(unzip -o "{}" -d "{}")",
+            outputFile,
+            path.string()
+        );
+
+        std::system((curlCommand + outputFile).c_str());
+        std::system((unzipCommand).c_str());
     }
 }

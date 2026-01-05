@@ -42,7 +42,7 @@ public:
     resistance({0,0,0,false}), 
     support({std::numeric_limits<double>::max(),0,0,false}), 
     tolerance(0.0005),
-    touchThreshold(3)
+    touchThreshold(5)
     {}
 
     Trade next(const CandleData&) override;

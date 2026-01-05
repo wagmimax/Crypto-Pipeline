@@ -5,6 +5,7 @@
 #include <fstream>
 #include <sstream>
 #include <iomanip>
+#include <filesystem>
 
 class Backtester
 {
@@ -21,7 +22,7 @@ private:
     void userControl();
 
     //use binance API to get historical candle data. stores in a temp file
-    void loadHistoricalData(const int& granularity, const std::string_view& ticker);
+    void loadHistoricalData(const std::filesystem::path& path, const int& granularity, const std::string_view& ticker);
 
     PaperAccount paperAccount;
 };
