@@ -32,6 +32,7 @@ void Backtester::run(Strategy& strategy)
     TempPath tempPath("BINANCEHISTORICALCANDLES");
     path = tempPath.getPath();
 
+    strategy.userInit();
     userControl();
 
     for (const auto& dirEntry : std::filesystem::recursive_directory_iterator(path))
@@ -92,8 +93,7 @@ void Backtester::run(Strategy& strategy)
             paperAccount.checkOpenPositions(candle);
         }
 
-        if(auto* supportresistance = dynamic_cast<SupportResistance*>(&strategy))
-            supportresistance->clearWindow();
+        strategy.reset();
     }
 
 
@@ -121,6 +121,7 @@ void Backtester::run(Strategy& strategy)
 
 }
 
+//Currently has just about no error checking regarding user input
 void Backtester::userControl()
 {
     tabulate::Table message;
@@ -138,14 +139,15 @@ void Backtester::userControl()
     
     if(userInput == "y")
     {
+        std::system("clear");
         loadHistoricalData(5, "BTCUSDT", {2023, 2024, 2025});
         loadHistoricalData(5, "ETHUSDT", {2023, 2024, 2025});
         loadHistoricalData(5, "SOLUSDT", {2023, 2024, 2025});
+        std::system("clear");
     }
     else
     {
         std::system("clear");
-        
 
         std::vector<int> years;
         std::string ticker;
@@ -178,8 +180,15 @@ void Backtester::userControl()
 
             std::cout << "Add more data? (y/n)";
             std::cin >> userInput;
+
+            std::system("clear");
         }
     }
+
+    std::cout << "Enter RR: ";
+    std::cin >> userInput;
+
+    if(userInput != "") paperAccount.setRR(std::stoi(userInput));
 }
 
 //calls binance API for historical candle data and unzips of the files

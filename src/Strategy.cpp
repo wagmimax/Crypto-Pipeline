@@ -81,7 +81,7 @@ Trade SupportResistance::next(const CandleData& candle)
     return trade;
 }
 
-void SupportResistance::clearWindow()
+void SupportResistance::reset()
 {
     rollingWindow.clear();
     resistance.active = false;

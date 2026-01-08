@@ -29,6 +29,14 @@ public:
     //every strategy subclass must update itself upon next candle
     virtual Trade next(const CandleData&) = 0;
 
+    //every strategy must reset to its original state in between historical data files
+    //files could be out of chronological order, or could be a completely different ticker
+    //to prevent incorrect data, engine will call this function to reset the strategy and start from new
+    virtual void reset() = 0;
+
+    //if you want user controlled options for your strategy
+    virtual void userInit() = 0;
+
     void enableDebugging()  { DEBUGGING_ON = true; };
     void disableDebugging() { DEBUGGING_ON = false; };
 protected:
@@ -46,7 +54,8 @@ public:
     {}
 
     Trade next(const CandleData&) override;
-    void clearWindow();
+    void reset() override;
+    void userInit() override {};
 
 private:
     struct Level

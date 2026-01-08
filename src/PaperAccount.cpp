@@ -82,6 +82,7 @@ void PaperAccount::checkOpenPositions(CandleData candle)
             wins++;
             if(DEBUGGING_ON) std::cout << "TAKEPROFIT HIT, BALANCE: " << balance_ << " PROFIT OF " << profit << std::endl;
             logTrade(position.tradeType, profit);
+            adjustRisk();
         }
 
         //loss
@@ -93,6 +94,7 @@ void PaperAccount::checkOpenPositions(CandleData candle)
             losses++;
             if(DEBUGGING_ON) std::cout << "STOPLOSS HIT, BALANCE: " << balance_ << " LOSS OF " <<  loss << std::endl;
             logTrade(position.tradeType, -loss);
+            adjustRisk();
         }
     }
     if(position.tradeType == TradeIntent::SHORT)
@@ -114,6 +116,7 @@ void PaperAccount::checkOpenPositions(CandleData candle)
             wins++;
             if(DEBUGGING_ON) std::cout << "TAKEPROFIT HIT, BALANCE: " << balance_ << " PROFIT OF " << profit << std::endl;
             logTrade(position.tradeType, profit);
+            adjustRisk();
         }
 
         //loss
@@ -125,10 +128,11 @@ void PaperAccount::checkOpenPositions(CandleData candle)
             losses++;
             if(DEBUGGING_ON) std::cout << "STOPLOSS HIT, BALANCE: " << balance_ << " LOSS OF " <<  loss << std::endl;
             logTrade(position.tradeType, -loss);
+            adjustRisk();
         }
     }
 
-    adjustRisk();
+    
 }
 
 void PaperAccount::adjustRisk()
