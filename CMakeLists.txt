@@ -46,13 +46,16 @@ find_package(imgui CONFIG REQUIRED)
 # --- tabulate ---
 find_package(tabulate CONFIG REQUIRED)
 
+# --- quickfix ---
+find_package(quickfix CONFIG REQUIRED)
+
 # --- Source files ---
 file(GLOB_RECURSE SOURCES ${PROJECT_SOURCE_DIR}/src/*.cpp)
 
 # --- Executable ---
 add_executable(${PROJECT_NAME} ${SOURCES})
 
-# --- Set output directory (AFTER target creation) ---
+# --- Set output directory ---
 set_target_properties(${PROJECT_NAME} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/build"
 )
@@ -66,6 +69,7 @@ target_link_libraries(${PROJECT_NAME}
     OpenSSL::Crypto
     tabulate::tabulate
     simdjson::simdjson
+    quickfix
     ws2_32
 )
 
