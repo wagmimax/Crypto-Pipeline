@@ -46,8 +46,7 @@ find_package(imgui CONFIG REQUIRED)
 # --- tabulate ---
 find_package(tabulate CONFIG REQUIRED)
 
-# --- quickfix ---
-find_package(quickfix CONFIG REQUIRED)
+find_package(cpp-jwt CONFIG REQUIRED)
 
 # --- Source files ---
 file(GLOB_RECURSE SOURCES ${PROJECT_SOURCE_DIR}/src/*.cpp)
@@ -69,7 +68,7 @@ target_link_libraries(${PROJECT_NAME}
     OpenSSL::Crypto
     tabulate::tabulate
     simdjson::simdjson
-    quickfix
+    cpp-jwt::cpp-jwt
     ws2_32
 )
 

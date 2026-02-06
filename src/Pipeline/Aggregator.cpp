@@ -1,6 +1,6 @@
 #include<Pipeline/Aggregator.h>
 #include<unordered_map>
-#include<profiler.h>
+#include<tools/profiler.h>
 
 void Aggregate(Database& sqliteDB, const std::vector<std::string> pairs)
 {

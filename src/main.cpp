@@ -1,7 +1,7 @@
 #include<iostream>
 #include<Pipeline/DataPipeline.h>
 #include<Backtester/Backtester.h>
-#include<Bot/FIXapp.h>
+#include<jwt/jwt.hpp>
 
 typedef enum SelectedMode{NONE = 0, PIPELINE, BACKTESTER, BOT}SelectedMode;
 
@@ -39,23 +39,22 @@ int main() {
         }break;
         case BOT:
         {
-            std::cout << "1";
-            FIX::SessionSettings settings("../../data/config/quickfix.cfg");
-            std::cout << "2";
-            FIXapp app;
-            std::cout << "3";
-            FIX::FileStoreFactory storeFactory(settings);
-            std::cout << "4";
-            FIX::FileLogFactory logFactory(settings);
-            std::cout << "5";
+            using namespace jwt::params;
 
-            FIX::SocketInitiator initiator(app, storeFactory, settings, logFactory);
-            std::cout << "6";
-            initiator.start();
-            std::cout << "7";
-            std::cin.get();
-            std::cout << "8";
-            initiator.stop();
+            auto key = ""; //Secret to use for the algorithm
+            //Create JWT object
+            jwt::jwt_object obj{algorithm("HS256"), payload({{"some", "payload"}}), secret(key)};
+
+            //Get the encoded string/assertion
+            auto enc_str = obj.signature();
+            std::cout << enc_str << std::endl;
+
+            //Decode
+            auto dec_obj = jwt::decode(enc_str, algorithms({"HS256"}), secret(key));
+            std::cout << dec_obj.header() << std::endl;
+            std::cout << dec_obj.payload() << std::endl;
+
+            
         }break;
     }
 }
