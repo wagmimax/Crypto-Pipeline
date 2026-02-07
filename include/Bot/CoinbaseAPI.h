@@ -6,7 +6,12 @@ std::string getToken();
 
 class CoinbaseAPI {
 public:
-    void getAccount();
+    void getAccounts();
+    void cancelOrders();
+    void closePosition();
+    void createOrder();
+    void editOrder();
+
 private:
 
 };

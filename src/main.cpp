@@ -1,7 +1,7 @@
 #include<iostream>
 #include<Pipeline/DataPipeline.h>
 #include<Backtester/Backtester.h>
-#include<jwt/jwt.hpp>
+#include<Bot/TradingBot.h>
 
 typedef enum SelectedMode{NONE = 0, PIPELINE, BACKTESTER, BOT}SelectedMode;
 
@@ -39,22 +39,13 @@ int main() {
         }break;
         case BOT:
         {
-            using namespace jwt::params;
-
-            auto key = ""; //Secret to use for the algorithm
-            //Create JWT object
-            jwt::jwt_object obj{algorithm("HS256"), payload({{"some", "payload"}}), secret(key)};
-
-            //Get the encoded string/assertion
-            auto enc_str = obj.signature();
-            std::cout << enc_str << std::endl;
-
-            //Decode
-            auto dec_obj = jwt::decode(enc_str, algorithms({"HS256"}), secret(key));
-            std::cout << dec_obj.header() << std::endl;
-            std::cout << dec_obj.payload() << std::endl;
-
+            TradingBot bot;
+            bot.start();
             
+            
+        
+            
+
         }break;
     }
 }

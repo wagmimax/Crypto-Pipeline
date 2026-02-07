@@ -27,3 +27,6 @@ build/
 
 #python
 **/__pycache__
+
+#secret key
+secret.pem
