@@ -23,7 +23,10 @@ if(ENABLE_TRACY)
 endif()
 
 # --- Boost Beast ---
-find_package(Boost CONFIG REQUIRED beast)
+find_package(Boost REQUIRED COMPONENTS
+    beast
+    uuid
+)
 
 # --- nlohmann_json ---
 find_package(nlohmann_json CONFIG REQUIRED)
@@ -66,6 +69,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 # --- Link libraries ---
 target_link_libraries(${PROJECT_NAME} 
     Boost::beast
+    Boost::uuid
     nlohmann_json::nlohmann_json
     unofficial::sqlite3::sqlite3
     OpenSSL::SSL

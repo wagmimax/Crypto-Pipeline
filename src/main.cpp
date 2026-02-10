@@ -39,9 +39,8 @@ int main() {
         }break;
         case BOT:
         {
-
             CoinbaseAPI api;
-            api.listAccounts();
+            api.createOrder();
 
             //getToken("GET", "/api/v3/brokerage/accounts");
             //TradingBot bot;
