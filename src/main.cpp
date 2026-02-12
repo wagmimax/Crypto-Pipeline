@@ -40,8 +40,9 @@ int main() {
         case BOT:
         {
             CoinbaseAPI api;
-            api.createOrder();
-
+            api.createOrder("ETH-USD", TradeIntent::LONG, 100, 1000, 900, 1100);
+            
+           
             //getToken("GET", "/api/v3/brokerage/accounts");
             //TradingBot bot;
             //bot.start();

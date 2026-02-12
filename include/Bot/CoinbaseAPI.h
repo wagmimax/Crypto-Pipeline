@@ -6,11 +6,20 @@
 #include "boost/uuid/uuid.hpp"
 #include "boost/uuid/uuid_generators.hpp"
 #include "boost/uuid/uuid_io.hpp"
+#include "Backtester/Strategy.h"
 #include<fstream>
 #include<iostream>
 #include<format>
 #include<list>
 #include<array>
+
+namespace Responses {
+    struct OrderResponse {
+
+        std::string orderId;
+
+    };
+}
 
 class CoinbaseAPI {
 public:
@@ -35,32 +44,50 @@ public:
         catch (curl::curl_easy_exception &error) {
             std::cerr << error.what() << std::endl;
         }
-
-        curl_slist_free_all(headers);
     }
     
-    void createOrder() {
+    // Create a limit order. Returns order_id string from response
+    std::string createOrder(const std::string_view& ticker, TradeIntent tradeIntent, double quote, double entryPrice, double stopLoss, double targetProfit) {
         std::string token = getToken("POST", "/api/v3/brokerage/orders");
 
+        // api response will be stored in curlOutput
         std::ostringstream curlOutput;
         curl::curl_ios<std::ostringstream> ios(curlOutput);
         curl::curl_easy easy(ios);
 
         boost::uuids::uuid uuid = boost::uuids::random_generator()();
     
+        // Set orders to automatically expire in 60 seconds (might change this later)
+        std::time_t time = std::time({}) + std::time_t{60};
+        char timeString[std::size("yyyy-mm-ddThh:mm:ssZ")];
+        std::strftime(std::data(timeString), std::size(timeString), "%FT%TZ", std::gmtime(&time));
+
+        // limit orders require base size
+        double base_size = quote / entryPrice;
+
+        // TODO: Refactor this with simdjson
         std::string jsonData = std::format(R"({{
             "client_order_id": "{}",
-            "product_id": "ETH-USD",
-            "side": "BUY",
+            "product_id": "{}",
+            "side": "{}",
             "order_configuration": {{
-                "market_market_ioc": {{
-                    "quote_size": "3"
+                "limit_limit_gtd": {{
+                    "base_size": "{}",
+                    "limit_price": "{}",
+                    "end_time": "{}"
+                }}
+            }},
+            "attached_order_configuration": {{
+                "trigger_bracket_gtc": {{
+                    "limit_price": "{}",
+                    "stop_trigger_price": "{}"
                 }}
             }}
-        }})", boost::uuids::to_string(uuid));
+        }})", 
+        boost::uuids::to_string(uuid), ticker, (tradeIntent == TradeIntent::LONG) ? "BUY" : "SELL" , base_size, entryPrice, timeString, targetProfit, stopLoss);
 
-        std::cout << boost::uuids::to_string(uuid) << std::endl;
-        std::cout << jsonData << std::endl;
+        std::cout << boost::uuids::to_string(uuid) << "\n";
+        std::cout << jsonData << "\n";
 
         struct curl_slist *headers = nullptr;
         headers = curl_slist_append(headers, ("Authorization: Bearer " + token).c_str());
@@ -74,13 +101,13 @@ public:
         try {
             easy.perform();
 
+            //TODO: Parse json and return order_id string
             std::cout << curlOutput.str() << std::endl;
+           
         } catch (curl::curl_easy_exception &error) {
             std::cout << "ERROR" << std::endl;
             std::cerr << error.what() << std::endl;
         }
-
-        curl_slist_free_all(headers);
     }
 
 private:
