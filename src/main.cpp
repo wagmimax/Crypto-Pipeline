@@ -39,10 +39,20 @@ int main() {
         }break;
         case BOT:
         {
-            CoinbaseAPI api;
-            api.createOrder("ETH-USD", TradeIntent::LONG, 100, 1000, 900, 1100);
+            std::ifstream inFile("../../secret.pem");
+            std::stringstream keystream;
+            keystream << inFile.rdbuf();
+
+            std::string key_name = std::getenv("COINBASE_KEY");
+            std::string key_secret = keystream.str();
+
+            CoinbaseAPI api(key_name, key_secret);
+            auto response = api.createOrder("ETH-USD", TradeIntent::LONG, 10, 1950, 900, 2000);
             
-           
+            std::this_thread::sleep_for(std::chrono::seconds(5));
+         
+            api.getOrder(response);
+
             //getToken("GET", "/api/v3/brokerage/accounts");
             //TradingBot bot;
             //bot.start();
