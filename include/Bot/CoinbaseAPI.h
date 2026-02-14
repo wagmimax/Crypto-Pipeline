@@ -14,31 +14,13 @@
 #include<list>
 #include<array>
 
-// structs for collecting data from the json response
-namespace Responses {
-    struct CreateOrderResponse {
-        std::string orderId;
-    };
-
-    struct ListAccountsResponse {
-
-    };
-
-    struct GetOrderResponse {
-
-        std::string status;
-        std::string side;
-        std::string completion_percentage;
-        std::string total_fees;
-
-    };
-}
-
 class CoinbaseAPI {
 public:
     CoinbaseAPI(const std::string_view& key_name, const std::string_view& key_secret) : key_name(key_name), key_secret(key_secret) {}
 
-    auto listAccounts() -> Responses::ListAccountsResponse {
+    // Iterates through list of accounts. Returns available balance of currency passed in
+    // Returns -1 if currency not found 
+    double listAccounts(const std::string_view& currency) {
         std::string token = getToken("GET", "/api/v3/brokerage/accounts");
         
         std::ostringstream curlOutput;
@@ -51,14 +33,25 @@ public:
         easy.add<CURLOPT_HTTPHEADER>(headers);
         easy.add<CURLOPT_URL>("https://api.coinbase.com/api/v3/brokerage/accounts");
         
-        try {
-            easy.perform();
+        easy.perform();
 
-            std::cout << curlOutput.str() << std::endl;
+        simdjson::dom::parser parser;
+        simdjson::padded_string stringJSON = curlOutput.str();
+        
+        simdjson::dom::element json;
+        parser.parse(stringJSON).get(json);
+
+        auto accounts = json["accounts"].get_array();
+        for(auto account : accounts) {
+            std::string parsedVal;
+            if(account["available_balance"]["currency"].get_string().get(parsedVal)) std::cout << "list accounts json error\n";    
+            if(parsedVal == currency) {
+                account["available_balance"]["value"].get_string().get(parsedVal);
+                return std::stod(parsedVal);
+            }
         }
-        catch (curl::curl_easy_exception &error) {
-            std::cerr << error.what() << std::endl;
-        }
+
+        return -1;
     }
     
     // Create a limit order. Returns order_id string from response
@@ -77,9 +70,14 @@ public:
         char timeString[std::size("yyyy-mm-ddThh:mm:ssZ")];
         std::strftime(std::data(timeString), std::size(timeString), "%FT%TZ", std::gmtime(&time));
 
-        // TODO: only allow 2 decimal places or else coinbase will reject the trade
         // limit orders require base size
-        double base_size = quote / entryPrice;
+        // Rounds to 7 decimal spots (too many decimals and coinbase rejects order, I think the max is 8?)
+        double baseSize;
+        {
+            double baseSizeUnrounded = quote / entryPrice;
+            long baseSizeLong = baseSizeUnrounded * 10000000;
+            baseSize = static_cast<double>(baseSizeLong) / 10000000;
+        }
 
         std::string jsonData = std::format(R"({{
             "client_order_id": "{}",
@@ -99,7 +97,7 @@ public:
                 }}
             }}
         }})", 
-        boost::uuids::to_string(uuid), ticker, (tradeIntent == TradeIntent::LONG) ? "BUY" : "SELL" , base_size, entryPrice, timeString, targetProfit, stopLoss);
+        boost::uuids::to_string(uuid), ticker, (tradeIntent == TradeIntent::LONG) ? "BUY" : "SELL" , baseSize, entryPrice, timeString, targetProfit, stopLoss);
 
         struct curl_slist *headers = nullptr;
         headers = curl_slist_append(headers, ("Authorization: Bearer " + token).c_str());
@@ -110,31 +108,23 @@ public:
         easy.add<CURLOPT_POST>(1L);
         easy.add<CURLOPT_POSTFIELDS>(jsonData.c_str());
 
-        try {
-            easy.perform();
+        easy.perform();
 
-            simdjson::dom::parser parser;
-            simdjson::padded_string stringJSON = curlOutput.str();
-            
-            simdjson::dom::element json;
-            parser.parse(stringJSON).get(json);
+        simdjson::dom::parser parser;
+        simdjson::padded_string stringJSON = curlOutput.str();
+        
+        simdjson::dom::element json;
+        parser.parse(stringJSON).get(json);
 
-            std::cout << curlOutput.str();
+        std::cout << curlOutput.str() << "\n\n\n";
 
-            std::string order_id;
-            if(json["success_response"]["order_id"].get_string().get(order_id)) std::cout << "create order json error\n";            
-            return order_id;
-           
-        } catch (curl::curl_easy_exception &error) {
-            std::cout << "create order curl error\n" << std::endl;
-            std::cerr << error.what() << std::endl;
-        }       
-
-        return {};
+        std::string order_id;
+        if(json["success_response"]["order_id"].get_string().get(order_id)) std::cout << "create order json error\n";            
+        return order_id;
     }
 
     // View an existing order's status
-    auto getOrder(const std::string_view& order_id) -> Responses::GetOrderResponse {
+    std::string getOrder(const std::string_view& order_id) {
         std::string requestPath = "/api/v3/brokerage/orders/historical/" + std::string(order_id);
         std::string token = getToken("GET", requestPath);
 
@@ -150,7 +140,15 @@ public:
 
         easy.perform();
 
-        std::cout << curlOutput.str();
+        simdjson::dom::parser parser;
+        simdjson::padded_string stringJSON = curlOutput.str();
+        
+        simdjson::dom::element json;
+        parser.parse(stringJSON).get(json);
+
+        std::string status;
+        if(json["status"].get_string().get(status)) std::cout << "get order json error\n";
+        return status;
     }
 
 private:

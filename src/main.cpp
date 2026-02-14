@@ -1,7 +1,6 @@
 #include<iostream>
 #include<Pipeline/DataPipeline.h>
 #include<Backtester/Backtester.h>
-#include<Bot/TradingBot.h>
 #include<Bot/CoinbaseAPI.h>
 typedef enum SelectedMode{NONE = 0, PIPELINE, BACKTESTER, BOT}SelectedMode;
 
@@ -47,11 +46,8 @@ int main() {
             std::string key_secret = keystream.str();
 
             CoinbaseAPI api(key_name, key_secret);
-            auto response = api.createOrder("ETH-USD", TradeIntent::LONG, 10, 1950, 900, 2000);
-            
-            std::this_thread::sleep_for(std::chrono::seconds(5));
-         
-            api.getOrder(response);
+            double val = api.listAccounts("TEST");
+            std::cout << val;
 
             //getToken("GET", "/api/v3/brokerage/accounts");
             //TradingBot bot;
