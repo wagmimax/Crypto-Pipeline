@@ -1,6 +1,6 @@
 #pragma once
 #include <Backtester/Strategy.h>
-
+#include <random>
 Trade SupportResistance::next(const CandleData& candle)
 {
     rollingWindow.push_back(candle);
@@ -86,4 +86,17 @@ void SupportResistance::reset()
     rollingWindow.clear();
     resistance.active = false;
     support.active = false;
+}
+
+Trade CoinFlip::next(const CandleData& candle) {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> distrib(1, 2);
+    int randomNum = distrib(gen);
+
+    Trade trade;
+    trade.entryLevel = candle.open;
+    trade.stopLossPercent = .4;
+    trade.tradeIntent = (randomNum == 1) ? TradeIntent::LONG : TradeIntent::SHORT;
+    return trade;
 }

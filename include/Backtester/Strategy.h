@@ -72,3 +72,12 @@ private:
     double tolerance;
     int touchThreshold;
 };
+
+class CoinFlip : public Strategy {
+public:
+    Trade next(const CandleData&) override;
+    void reset() override {}
+    void userInit() override {}
+private:
+
+};

@@ -81,8 +81,6 @@ public:
         
         easy.perform();
 
-        std::cout << curlOutput.str();
-
         simdjson::dom::parser parser;
         simdjson::padded_string stringJSON = curlOutput.str();
         
@@ -118,13 +116,20 @@ public:
         std::strftime(std::data(timeString), std::size(timeString), "%FT%TZ", std::gmtime(&time));
 
         // limit orders require base size
-        // Rounds to 7 decimal spots (too many decimals and coinbase rejects order, I think the max is 8?)
-        double baseSize;
-        {
-            double baseSizeUnrounded = quote / entryPrice;
-            long baseSizeLong = baseSizeUnrounded * 10000000;
-            baseSize = static_cast<double>(baseSizeLong) / 10000000;
-        }
+        // Round to 6 decimal spots (too many decimals and coinbase rejects order, I think the max is 8?)
+        auto setDecimalPrecision{ [](double num, int precision) -> double {
+            int multiplier = 1;
+            for(int i = 0; i < precision; i++) {
+                multiplier *= 10;
+            }
+
+            long long normalizedLong = num * multiplier;
+            return(static_cast<double>(normalizedLong) / multiplier);
+        } };
+
+        double baseSize = setDecimalPrecision(quote / entryPrice, 6);
+        targetProfit = setDecimalPrecision(targetProfit, 2);
+        stopLoss = setDecimalPrecision(stopLoss, 2);
 
         std::string jsonData = std::format(R"({{
             "client_order_id": "{}",
@@ -145,6 +150,7 @@ public:
             }}
         }})", 
         boost::uuids::to_string(uuid), ticker, (tradeIntent == TradeIntent::LONG) ? "BUY" : "SELL" , baseSize, entryPrice, timeString, targetProfit, stopLoss);
+        std::cout << jsonData << std::endl;
 
         struct curl_slist *headers = nullptr;
         headers = curl_slist_append(headers, ("Authorization: Bearer " + token).c_str());

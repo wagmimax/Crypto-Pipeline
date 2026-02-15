@@ -9,7 +9,7 @@
 
 class Pipeline {
 public:
-    Pipeline(const std::vector<std::string>& pairs = {"BTCUSD", "ETHUSD", "SOLUSD"},
+    Pipeline(const std::vector<std::string>& pairs = {"ETHUSD"},
              const std::string& host = "advanced-trade-ws.coinbase.com",
              const std::string& port = "443",
              const std::string& path = "/ws/v1") :
@@ -24,7 +24,29 @@ public:
     Pipeline(const Pipeline&&) = delete;
     Pipeline& operator=(const Pipeline&&) = delete;
 
-    void start();
+    template<typename... Threads>
+    void start(Threads&&... threads) {
+        (threads_.push_back(std::move(threads)), ...);
+
+        threads_.emplace_back(&WebSocketClient::run, &coinbaseStream_, pairs_);
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        
+        //flush any bad data in the beginning 
+        rawData.clearData();
+        tradeData.clearData();
+
+        threads_.emplace_back(parseData);
+        threads_.emplace_back(Aggregate, std::ref(database_), std::ref(pairs_));
+        //threads_.emplace_back(&NamedPipe::sendData, &server_);
+        //threads_.emplace_back(logger);
+
+        for(auto& thread : threads_) {
+            if(thread.joinable()) {
+                thread.join();
+            }
+        }
+    }
+    
     void stop() {};
 
 private:

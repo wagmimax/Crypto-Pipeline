@@ -1,7 +1,8 @@
 #include<iostream>
 #include<Pipeline/DataPipeline.h>
 #include<Backtester/Backtester.h>
-#include<Bot/CoinbaseAPI.h>
+#include<Bot/Meka.h>
+
 typedef enum SelectedMode{NONE = 0, PIPELINE, BACKTESTER, BOT}SelectedMode;
 
 int main() {
@@ -45,18 +46,14 @@ int main() {
             std::string key_name = std::getenv("COINBASE_KEY");
             std::string key_secret = keystream.str();
 
+
             CoinbaseAPI api(key_name, key_secret);
-            double val = api.listAccounts("TEST");
-            std::cout << val;
-
-            //getToken("GET", "/api/v3/brokerage/accounts");
-            //TradingBot bot;
-            //bot.start();
+            AccountManager man(api); 
+            CoinFlip coinFlip;
+            Meka meka;
             
-            
-        
-            
-
+            Pipeline pipeline;
+            pipeline.start(std::thread(&Meka::start, &meka, std::ref(coinFlip), std::ref(api), std::ref(man)));
         }break;
     }
 }

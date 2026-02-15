@@ -26,7 +26,6 @@ void Aggregate(Database& sqliteDB, const std::vector<std::string> pairs)
         // auto start = std::chrono::high_resolution_clock::now();
         
         std::string_view ticker = currentTrade.ticker;
-
         std::string_view currentMinute(currentTrade.time.c_str() + 14, 2);
 
         //coinbase sends old trade data sometimes. needs to be ignored
@@ -42,7 +41,9 @@ void Aggregate(Database& sqliteDB, const std::vector<std::string> pairs)
             if(candle.minute != "temp")
             {
                 candle.latencyTimestamp = currentTrade.latencyTimestamp;
-                sqliteDB.writeData(candle);
+                candleData.push(candle);
+                //sqliteDB.writeData(candle);
+
                 // std::cout << candle.minute << " Candle Closed. OHLC: " << candle.open 
                 //     << " High: " << candle.high << " Low: " << candle.low 
                 //     << " Close: " << candle.close << " Timestamp: " << candle.timestamp << std::endl;
@@ -63,7 +64,7 @@ void Aggregate(Database& sqliteDB, const std::vector<std::string> pairs)
         if(candle.high < currentTrade.price) candle.high = currentTrade.price;
         if(candle.low > currentTrade.price) candle.low = currentTrade.price; 
 
-        candleData.push(candle);
+        //candleData.push(candle);
 
         // auto end = std::chrono::high_resolution_clock::now();
         // std::cout << "Aggregator latency: " << 

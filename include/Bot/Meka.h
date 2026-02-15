@@ -1,28 +1,14 @@
 #pragma once
 #include"CoinbaseAPI.h"
 #include"Backtester/Strategy.h"
+#include"Bot/AccountManager.h"  // this can cause circular include 
 
+// Crypto Trading Bot
 class Meka {
 public:
 
-    void start(Strategy&, CoinbaseAPI&);
+    void start(Strategy&, CoinbaseAPI&, AccountManager&);
     
 private:
     
 };
-
-/*
-#pragma once
-#include<Bot/Meka.h>
-#include<ConcurrentQueue.h>
-
-void Meka::start(Strategy& strategy, CoinbaseAPI& api) {
-
-    while (true) {
-        CandleData candle = candleData.popValue();
-        Trade trade = strategy.next(candle);
-
-        if(trade.tradeIntent == TradeIntent::NONE) continue;
-    }
-}
-*/
