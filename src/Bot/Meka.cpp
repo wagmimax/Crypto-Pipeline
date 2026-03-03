@@ -23,8 +23,11 @@ void Meka::start(Strategy& strategy, CoinbaseAPI& api, AccountManager& account) 
             std::cout << "MONITORING OPEN TRADE...\n";
             std::this_thread::sleep_for(std::chrono::minutes(1));
             if(api.getOrder(order_id) == "FILLED") {
-                std::cout << "TRADE EXIT FILLED, NO LONGER IN TRADE\n";
+                std::cout << "TRADE EXIT FILLED\n";
                 inTrade = false; 
+                strategy.reset();
+                candleData.clearData();
+                std::cout << "NO LONGER IN TRADE, STRATEGY RESET, QUEUE CLEARED\n";
             } 
         }
     }
